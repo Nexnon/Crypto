@@ -26,4 +26,12 @@ public class UserDAO {
         tx1.commit();
         session.close();
     }
+
+    public void updateUser(UserDB user) {
+        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        Transaction tx1 = session.beginTransaction();
+        session.update(user);
+        tx1.commit();
+        session.close();
+    }
 }

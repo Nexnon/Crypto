@@ -24,4 +24,12 @@ public class WalletDAO {
         tx1.commit();
         session.close();
     }
+
+    public void updateWallet(WalletDB wallet) {
+        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        Transaction tx1 = session.beginTransaction();
+        session.update(wallet);
+        tx1.commit();
+        session.close();
+    }
 }
