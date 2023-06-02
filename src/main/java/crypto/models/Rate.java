@@ -1,4 +1,4 @@
-package crypto.models.data;
+package crypto.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -6,7 +6,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "currency_rates")
-public class RateDB {
+public class Rate {
 
     private Long id;
     private static long max_id = 0; /////!!!!!!
@@ -14,7 +14,7 @@ public class RateDB {
     private String second_currency;
     private double rate;
 
-    public RateDB(){
+    public Rate(){
         id = max_id++;
     }
 
@@ -24,6 +24,21 @@ public class RateDB {
 
     public void setFirst_currency(String first_currency) {
         this.first_currency = first_currency;
+    }
+
+    public String getOtherCurrency(String baseCurrency){
+        if(baseCurrency.equals(first_currency)){
+            return second_currency;
+        } else{ ///!!!!!!
+            return first_currency;
+        }
+    }
+    public void setRateToCurrency(String currency, double rate){
+        if(currency.equals(first_currency)){
+            this.rate = rate;
+        } else{
+            this.rate = 1/rate;
+        }
     }
 
     public String getSecond_currency() {

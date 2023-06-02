@@ -3,9 +3,9 @@ package crypto.controllers;
 import crypto.database.RateDAO;
 import crypto.database.UserDAO;
 import crypto.database.WalletDAO;
-import crypto.models.data.RateDB;
-import crypto.models.data.UserDB;
-import crypto.models.data.WalletDB;
+import crypto.models.Rate;
+import crypto.models.User;
+import crypto.models.Wallet;
 import crypto.models.requests.SingUpRequest;
 import crypto.models.requests.getWalletsRequest;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +25,11 @@ public class BaseController {
     public @ResponseBody Map<String, String> registration(@RequestBody SingUpRequest singUpModel){
         HashMap<String, String> response = new HashMap<>();
         if(userDao.findByEmailUsername(singUpModel.getUsername(), singUpModel.getEmail()) == null){
-            UserDB newUser = new UserDB(singUpModel.getUsername(), singUpModel.getEmail());
+            User newUser = new User(singUpModel.getUsername(), singUpModel.getEmail());
 
             userDao.saveUser(newUser);
-            walletDao.saveWallet(new WalletDB(newUser,"RUB"));
-            walletDao.saveWallet(new WalletDB(newUser,"BTC"));
+            walletDao.saveWallet(new Wallet(newUser,"RUB"));
+            walletDao.saveWallet(new Wallet(newUser,"BTC"));
 
             response.put("secret_key", newUser.getSecret_key());
         } else{
@@ -41,15 +41,15 @@ public class BaseController {
     @GetMapping("/get-wallets")
     public @ResponseBody Map<String, String> getWallets(@RequestBody getWalletsRequest getWalletsRequest){
         //!!!!
-        UserDB user = userDao.findByKey(getWalletsRequest.getSecret_key());
+        User user = userDao.findByKey(getWalletsRequest.getSecret_key());
         //!!!!
         HashMap<String, String> response = new HashMap<>();
         if(user == null){
             response.put("error", "user_not_found");
             return response;
         }
-        List<WalletDB> walletList = walletDao.findByUser(user.getSecret_key());
-        for (WalletDB wallet : walletList){
+        List<Wallet> walletList = walletDao.findByUser(user.getSecret_key());
+        for (Wallet wallet : walletList){
             response.put(wallet.getCurrency() + "_wallet", "" + wallet.getValue());
         }
         return response;
@@ -61,9 +61,9 @@ public class BaseController {
 
         if(userDao.findByKey(fillUpWalletRequest.get("secret_key")) != null){
 
-            List<WalletDB> wallets = walletDao.findByUser(fillUpWalletRequest.get("secret_key")); ///!!!!!
+            List<Wallet> wallets = walletDao.findByUser(fillUpWalletRequest.get("secret_key")); ///!!!!!
 
-            for(WalletDB w: wallets){
+            for(Wallet w: wallets){
                 if(fillUpWalletRequest.containsKey((w.getCurrency()+"_wallet"))){
                     if(Double.parseDouble(fillUpWalletRequest.get((w.getCurrency()+"_wallet"))) <= 0){
                         response.put("error", "value_must_be_positive");
@@ -93,9 +93,9 @@ public class BaseController {
 
         if(userDao.findByKey(withdrawalRequest.get("secret_key")) != null){
 
-            List<WalletDB> wallets = walletDao.findByUser(withdrawalRequest.get("secret_key")); /// !!!!!
+            List<Wallet> wallets = walletDao.findByUser(withdrawalRequest.get("secret_key")); /// !!!!!
 
-            for(WalletDB w: wallets){
+            for(Wallet w: wallets){
                 if(w.getCurrency().equals(withdrawalRequest.get("currency"))){
                     if(Double.parseDouble(withdrawalRequest.get("count")) <= 0){
                         response.put("error", "count_must_be_positive");
@@ -129,14 +129,14 @@ public class BaseController {
 
         System.out.println(getRateRequest.get("currency"));
 
-        List<RateDB> rates = rateDao.findByCurrency(getRateRequest.get("currency"));
+        List<Rate> rates = rateDao.findByCurrency(getRateRequest.get("currency"));
 
         if(rates == null){
             response.put("error", "rate_not_found");
             return response;
         }
 
-        for (RateDB rate : rates){
+        for (Rate rate : rates){
             if(rate.getFirst_currency().equals(getRateRequest.get("currency"))){
                 response.put(rate.getSecond_currency(), "" + rate.getRate()); //1111
             } else{
@@ -153,11 +153,11 @@ public class BaseController {
             response.put("error", "user_not_found");
             return response;
         }
-        List<WalletDB> wallets = walletDao.findByUser(exchangeRequest.get("secret_key"));
-        WalletDB wallet_from = null;
-        WalletDB wallet_to = null;
+        List<Wallet> wallets = walletDao.findByUser(exchangeRequest.get("secret_key"));
+        Wallet wallet_from = null;
+        Wallet wallet_to = null;
 
-        for(WalletDB wallet : wallets){
+        for(Wallet wallet : wallets){
             if(wallet.getCurrency().equals(exchangeRequest.get("currency_from"))){
                 wallet_from = wallet;
                 System.out.println(wallet_from.getCurrency());
@@ -180,7 +180,7 @@ public class BaseController {
             return response;
         }
 
-        RateDB rate = rateDao.findByCurrencies(exchangeRequest.get("currency_from"), exchangeRequest.get("currency_to"));
+        Rate rate = rateDao.findByCurrencies(exchangeRequest.get("currency_from"), exchangeRequest.get("currency_to"));
 
         wallet_from.setValue(wallet_from.getValue() - Double.parseDouble(exchangeRequest.get("amount")));
 

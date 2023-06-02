@@ -1,8 +1,8 @@
 package crypto.database;
 
-import crypto.models.data.RateDB;
-import crypto.models.data.UserDB;
-import crypto.models.data.WalletDB;
+import crypto.models.Rate;
+import crypto.models.User;
+import crypto.models.Wallet;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
@@ -17,9 +17,9 @@ public class HibernateSessionFactoryUtil {
         if (sessionFactory == null) {
             try {
                 Configuration configuration = new Configuration().configure();
-                configuration.addAnnotatedClass(UserDB.class);
-                configuration.addAnnotatedClass(RateDB.class);
-                configuration.addAnnotatedClass(WalletDB.class);
+                configuration.addAnnotatedClass(User.class);
+                configuration.addAnnotatedClass(Rate.class);
+                configuration.addAnnotatedClass(Wallet.class);
                 StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
                 sessionFactory = configuration.buildSessionFactory(builder.build());
 

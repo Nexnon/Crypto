@@ -1,4 +1,4 @@
-package crypto.models.data;
+package crypto.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -6,7 +6,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name="wallets")
-public class WalletDB {
+public class Wallet {
 
     private Long id;
     private static long max_id = 0; //!!!!!
@@ -15,9 +15,9 @@ public class WalletDB {
     private String currency;
     private double value;
 
-    public WalletDB(){}
+    public Wallet(){}
 
-    public WalletDB(UserDB user, String currency){
+    public Wallet(User user, String currency){
         this.secret_key = user.getSecret_key();
         this.currency = currency;
         this.value = 0;

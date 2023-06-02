@@ -1,4 +1,4 @@
-package crypto.models.data;
+package crypto.models;
 
 import jakarta.persistence.*;
 import org.hibernate.type.NumericBooleanConverter;
@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 
 @Entity
 @Table(name = "users")
-public class UserDB {
+public class User {
 
     @Id
     private String secret_key;
@@ -19,9 +19,9 @@ public class UserDB {
     @Convert(converter = NumericBooleanConverter.class)
     private boolean isAdmin;
 
-    public UserDB(){}
+    public User(){}
 
-    public UserDB(String username, String email){
+    public User(String username, String email){
         this.username = username;
         this.email = email;
         md();
