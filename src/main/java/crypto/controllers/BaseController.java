@@ -1,11 +1,10 @@
 package crypto.controllers;
 
+import crypto.database.OperationDAO;
 import crypto.database.RateDAO;
 import crypto.database.UserDAO;
 import crypto.database.WalletDAO;
-import crypto.models.Rate;
-import crypto.models.User;
-import crypto.models.Wallet;
+import crypto.models.*;
 import crypto.models.requests.SingUpRequest;
 import crypto.models.requests.getWalletsRequest;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +19,7 @@ public class BaseController {
     private UserDAO userDao = new UserDAO();
     private WalletDAO walletDao = new WalletDAO();
     private RateDAO rateDao = new RateDAO();
+    private OperationDAO operationDAO = new OperationDAO();
 
     @PostMapping("/sing-up")
     public @ResponseBody Map<String, String> registration(@RequestBody SingUpRequest singUpModel){
@@ -74,6 +74,9 @@ public class BaseController {
                                     Double.parseDouble(
                                             fillUpWalletRequest.get(w.getCurrency()+"_wallet")));
                     walletDao.updateWallet(w);
+
+                    operationDAO.saveOperation(new Operation(1));
+
                     response.put(w.getCurrency() + "_wallet", "" + w.getValue());
                 }
             }
@@ -110,6 +113,9 @@ public class BaseController {
                                     Double.parseDouble(
                                             withdrawalRequest.get("count")));
                     walletDao.updateWallet(w);
+
+                    operationDAO.saveOperation(new Operation(2));
+
                     response.put(w.getCurrency() + "_wallet", "" + w.getValue());
                 }
             }
@@ -192,6 +198,8 @@ public class BaseController {
 
         walletDao.updateWallet(wallet_from);
         walletDao.updateWallet(wallet_to);
+
+        operationDAO.saveOperation(new Operation(3));
 
         response.put(wallet_from.getCurrency() + "_wallet", ""+wallet_from.getValue());
         response.put(wallet_to.getCurrency() + "_wallet", ""+wallet_to.getValue());

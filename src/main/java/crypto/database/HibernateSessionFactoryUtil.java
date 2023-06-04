@@ -1,5 +1,6 @@
 package crypto.database;
 
+import crypto.models.Operation;
 import crypto.models.Rate;
 import crypto.models.User;
 import crypto.models.Wallet;
@@ -20,6 +21,7 @@ public class HibernateSessionFactoryUtil {
                 configuration.addAnnotatedClass(User.class);
                 configuration.addAnnotatedClass(Rate.class);
                 configuration.addAnnotatedClass(Wallet.class);
+                configuration.addAnnotatedClass(Operation.class);
                 StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
                 sessionFactory = configuration.buildSessionFactory(builder.build());
 
