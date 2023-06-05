@@ -1,5 +1,6 @@
 package crypto.models;
 
+import crypto.database.OperationDAO;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -12,8 +13,8 @@ import java.util.Date;
 public class Operation {
 
     @Id
-    private long id;
-    private static long max_id = 0; ///!!!!
+    private int id;
+    private static int max_id;
 
     private Date date;
     private int code;
@@ -26,11 +27,15 @@ public class Operation {
         date = new Date();
     }
 
-    public long getId() {
+    public static void setMax_id(){
+        max_id = OperationDAO.getMaxID() + 1;
+    }
+
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

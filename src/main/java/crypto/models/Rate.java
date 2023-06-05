@@ -1,5 +1,7 @@
 package crypto.models;
 
+import crypto.database.OperationDAO;
+import crypto.database.RateDAO;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -8,14 +10,18 @@ import jakarta.persistence.Table;
 @Table(name = "currency_rates")
 public class Rate {
 
-    private Long id;
-    private static long max_id = 0; /////!!!!!!
+    private int id;
+    private static int max_id; /////!!!!!!
     private String first_currency;
     private String second_currency;
     private double rate;
 
     public Rate(){
         id = max_id++;
+    }
+
+    public static void setMax_id(){
+        max_id = RateDAO.getMaxID() + 1;
     }
 
     public String getFirst_currency() {
@@ -57,12 +63,12 @@ public class Rate {
         this.rate = rate;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
     @Id
-    public Long getId() {
+    public int getId() {
         return id;
     }
 }

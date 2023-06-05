@@ -4,7 +4,6 @@ import crypto.database.OperationDAO;
 import crypto.database.RateDAO;
 import crypto.database.UserDAO;
 import crypto.database.WalletDAO;
-import crypto.models.Operation;
 import crypto.models.Rate;
 import crypto.models.Wallet;
 import org.springframework.web.bind.annotation.*;
@@ -19,20 +18,15 @@ import java.util.Map;
 @RestController
 public class AdminController {
 
-    private UserDAO userDao = new UserDAO();
-    private WalletDAO walletDao = new WalletDAO();
-    private RateDAO rateDao = new RateDAO();
-    private OperationDAO operationDAO = new OperationDAO();
-
     @PostMapping("/change-rate")
     public @ResponseBody Map<String, String> changeRate(@RequestBody Map<String, String> changeRequest){
         Map<String, String> response = new HashMap<>();
 
         String base_currency = changeRequest.get("base_currency");
         String secret_key = changeRequest.get("secret_key");
-        List<Rate> rates = rateDao.findByCurrency(base_currency);
+        List<Rate> rates = RateDAO.findByCurrency(base_currency);
 
-        if(!userDao.findByKey(secret_key).isAdmin()){
+        if(!UserDAO.findByKey(secret_key).isAdmin()){
             response.put("error", "you_dont_have_enough_permissions");
             return response;
         }
@@ -41,7 +35,7 @@ public class AdminController {
             double value = Double.parseDouble(changeRequest.get(rate.getOtherCurrency(base_currency)));
             rate.setRateToCurrency(base_currency, value);
             response.put(rate.getOtherCurrency(base_currency), ""+value);
-            rateDao.updateRate(rate);
+            RateDAO.updateRate(rate);
         }
 
         return response;
@@ -54,12 +48,12 @@ public class AdminController {
         String secret_key = getAllRequest.get("secret_key");
         String currency = getAllRequest.get("currency");
 
-        if(!userDao.findByKey(secret_key).isAdmin()){
+        if(!UserDAO.findByKey(secret_key).isAdmin()){
             response.put("error", "you_dont_have_enough_permissions");
             return response;
         }
 
-        List<Wallet> wallets = walletDao.findByCurrency(currency);
+        List<Wallet> wallets = WalletDAO.findByCurrency(currency);
         if(wallets == null){
             response.put("error", "wallets_not_found");
             return response;
@@ -78,7 +72,7 @@ public class AdminController {
     public @ResponseBody Map<String, String> getOperationsCount(@RequestBody Map<String, String> request){
         Map<String, String> response = new HashMap<>();
 
-        if(!userDao.findByKey(request.get("secret_key")).isAdmin()){
+        if(!UserDAO.findByKey(request.get("secret_key")).isAdmin()){
             response.put("error", "you_dont_have_enough_permissions");
             return response;
         }
@@ -87,7 +81,7 @@ public class AdminController {
         Date dateFrom = parser.parse(request.get("date_from"));
         Date dateTo = parser.parse(request.get("date_to"));
 
-        List operations = operationDAO.findByDates(dateFrom, dateTo);
+        List operations = OperationDAO.findByDates(dateFrom, dateTo);
         response.put("transaction_count", ""+operations.size());
 
         return response;

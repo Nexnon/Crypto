@@ -5,8 +5,6 @@ import crypto.database.RateDAO;
 import crypto.database.UserDAO;
 import crypto.database.WalletDAO;
 import crypto.models.*;
-import crypto.models.requests.SingUpRequest;
-import crypto.models.requests.getWalletsRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -16,20 +14,15 @@ import java.util.Map;
 @RestController
 public class BaseController {
 
-    private UserDAO userDao = new UserDAO();
-    private WalletDAO walletDao = new WalletDAO();
-    private RateDAO rateDao = new RateDAO();
-    private OperationDAO operationDAO = new OperationDAO();
-
     @PostMapping("/sing-up")
-    public @ResponseBody Map<String, String> registration(@RequestBody SingUpRequest singUpModel){
+    public @ResponseBody Map<String, String> registration(@RequestBody Map<String, String> request){
         HashMap<String, String> response = new HashMap<>();
-        if(userDao.findByEmailUsername(singUpModel.getUsername(), singUpModel.getEmail()) == null){
-            User newUser = new User(singUpModel.getUsername(), singUpModel.getEmail());
+        if(UserDAO.findByEmailUsername(request.get("username"), request.get("email")) == null){
+            User newUser = new User(request.get("username"), request.get("email"));
 
-            userDao.saveUser(newUser);
-            walletDao.saveWallet(new Wallet(newUser,"RUB"));
-            walletDao.saveWallet(new Wallet(newUser,"BTC"));
+            UserDAO.saveUser(newUser);
+            WalletDAO.saveWallet(new Wallet(newUser,"RUB"));
+            WalletDAO.saveWallet(new Wallet(newUser,"BTC"));
 
             response.put("secret_key", newUser.getSecret_key());
         } else{
@@ -39,16 +32,16 @@ public class BaseController {
     }
 
     @GetMapping("/get-wallets")
-    public @ResponseBody Map<String, String> getWallets(@RequestBody getWalletsRequest getWalletsRequest){
-        //!!!!
-        User user = userDao.findByKey(getWalletsRequest.getSecret_key());
-        //!!!!
+    public @ResponseBody Map<String, String> getWallets(@RequestBody Map<String, String> request){
         HashMap<String, String> response = new HashMap<>();
+
+        User user = UserDAO.findByKey(request.get("secret_key"));
         if(user == null){
             response.put("error", "user_not_found");
             return response;
         }
-        List<Wallet> walletList = walletDao.findByUser(user.getSecret_key());
+
+        List<Wallet> walletList = WalletDAO.findByUser(user.getSecret_key());
         for (Wallet wallet : walletList){
             response.put(wallet.getCurrency() + "_wallet", "" + wallet.getValue());
         }
@@ -59,9 +52,9 @@ public class BaseController {
     public @ResponseBody Map<String, String> fillUpWallet(@RequestBody Map<String, String> fillUpWalletRequest){
         HashMap<String, String> response = new HashMap<>();
 
-        if(userDao.findByKey(fillUpWalletRequest.get("secret_key")) != null){
+        if(UserDAO.findByKey(fillUpWalletRequest.get("secret_key")) != null){
 
-            List<Wallet> wallets = walletDao.findByUser(fillUpWalletRequest.get("secret_key")); ///!!!!!
+            List<Wallet> wallets = WalletDAO.findByUser(fillUpWalletRequest.get("secret_key")); ///!!!!!
 
             for(Wallet w: wallets){
                 if(fillUpWalletRequest.containsKey((w.getCurrency()+"_wallet"))){
@@ -73,9 +66,9 @@ public class BaseController {
                             w.getValue()+
                                     Double.parseDouble(
                                             fillUpWalletRequest.get(w.getCurrency()+"_wallet")));
-                    walletDao.updateWallet(w);
+                    WalletDAO.updateWallet(w);
 
-                    operationDAO.saveOperation(new Operation(1));
+                    OperationDAO.saveOperation(new Operation(1));
 
                     response.put(w.getCurrency() + "_wallet", "" + w.getValue());
                 }
@@ -94,9 +87,9 @@ public class BaseController {
     public @ResponseBody Map<String, String> withdrawal(@RequestBody Map<String, String> withdrawalRequest){
         HashMap<String, String> response = new HashMap<>();
 
-        if(userDao.findByKey(withdrawalRequest.get("secret_key")) != null){
+        if(UserDAO.findByKey(withdrawalRequest.get("secret_key")) != null){
 
-            List<Wallet> wallets = walletDao.findByUser(withdrawalRequest.get("secret_key")); /// !!!!!
+            List<Wallet> wallets = WalletDAO.findByUser(withdrawalRequest.get("secret_key")); /// !!!!!
 
             for(Wallet w: wallets){
                 if(w.getCurrency().equals(withdrawalRequest.get("currency"))){
@@ -112,9 +105,9 @@ public class BaseController {
                             w.getValue()-
                                     Double.parseDouble(
                                             withdrawalRequest.get("count")));
-                    walletDao.updateWallet(w);
+                    WalletDAO.updateWallet(w);
 
-                    operationDAO.saveOperation(new Operation(2));
+                    OperationDAO.saveOperation(new Operation(2));
 
                     response.put(w.getCurrency() + "_wallet", "" + w.getValue());
                 }
@@ -135,7 +128,7 @@ public class BaseController {
 
         System.out.println(getRateRequest.get("currency"));
 
-        List<Rate> rates = rateDao.findByCurrency(getRateRequest.get("currency"));
+        List<Rate> rates = RateDAO.findByCurrency(getRateRequest.get("currency"));
 
         if(rates == null){
             response.put("error", "rate_not_found");
@@ -155,11 +148,11 @@ public class BaseController {
     @PostMapping("/exchange")
     public @ResponseBody Map<String, String> exchange(@RequestBody Map<String, String> exchangeRequest){
         Map<String, String> response = new HashMap<>();
-        if(userDao.findByKey(exchangeRequest.get("secret_key")) == null){
+        if(UserDAO.findByKey(exchangeRequest.get("secret_key")) == null){
             response.put("error", "user_not_found");
             return response;
         }
-        List<Wallet> wallets = walletDao.findByUser(exchangeRequest.get("secret_key"));
+        List<Wallet> wallets = WalletDAO.findByUser(exchangeRequest.get("secret_key"));
         Wallet wallet_from = null;
         Wallet wallet_to = null;
 
@@ -186,7 +179,7 @@ public class BaseController {
             return response;
         }
 
-        Rate rate = rateDao.findByCurrencies(exchangeRequest.get("currency_from"), exchangeRequest.get("currency_to"));
+        Rate rate = RateDAO.findByCurrencies(exchangeRequest.get("currency_from"), exchangeRequest.get("currency_to"));
 
         wallet_from.setValue(wallet_from.getValue() - Double.parseDouble(exchangeRequest.get("amount")));
 
@@ -196,10 +189,10 @@ public class BaseController {
             wallet_to.setValue(wallet_to.getValue() + (1/rate.getRate()) * Double.parseDouble(exchangeRequest.get("amount")));
         }
 
-        walletDao.updateWallet(wallet_from);
-        walletDao.updateWallet(wallet_to);
+        WalletDAO.updateWallet(wallet_from);
+        WalletDAO.updateWallet(wallet_to);
 
-        operationDAO.saveOperation(new Operation(3));
+        OperationDAO.saveOperation(new Operation(3));
 
         response.put(wallet_from.getCurrency() + "_wallet", ""+wallet_from.getValue());
         response.put(wallet_to.getCurrency() + "_wallet", ""+wallet_to.getValue());
