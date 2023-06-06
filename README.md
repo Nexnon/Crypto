@@ -20,8 +20,8 @@
 
 ## Все данные сохраняются в бд PostgeSQL
 Имеется 4 таблицы:
-1. users (поля: secret_key pk, username, email)
-2. wallets (поля: id pk, secret_key fk, value, currency)
-3. rates (поля: id pk, first_currency, second_currency, rate)
-4. operations (поля: id pk, date, code)
+1. users (поля: secret_key \<pk\>, username, email)
+2. wallets (поля: id \<pk\>, secret_key \<fk\>, value, currency)
+3. rates (поля: id \<pk\>, first_currency, second_currency, rate)
+4. operations (поля: id \<pk\>, date, code)
 
