@@ -19,7 +19,7 @@
 #### Если у пользователя недостаточно прав, возввращается json {"error":"you_dont_have_enough_permissions"}
 
 ## Все данные сохраняются в бд PostgeSQL
-Для подключения бд использовался Hibernate
+Для подключения бд использовался Hibernate  
 Имеется 4 таблицы:
 1. users (поля: secret_key \<pk\>, username, email)
 2. wallets (поля: id \<pk\>, secret_key \<fk\>, value, currency)
