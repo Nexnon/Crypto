@@ -35,8 +35,15 @@ public class Rate {
     public String getOtherCurrency(String baseCurrency){
         if(baseCurrency.equals(first_currency)){
             return second_currency;
-        } else{ ///!!!!!!
+        } else{
             return first_currency;
+        }
+    }
+    public double getRateToCurrency(String currency){
+        if(currency.equals(first_currency)){
+            return this.rate;
+        } else{
+            return 1/this.rate;
         }
     }
     public void setRateToCurrency(String currency, double rate){

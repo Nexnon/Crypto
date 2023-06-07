@@ -19,11 +19,11 @@ import java.util.Map;
 public class AdminController {
 
     @PostMapping("/change-rate")
-    public @ResponseBody Map<String, String> changeRate(@RequestBody Map<String, String> changeRequest){
+    public @ResponseBody Map<String, String> changeRate(@RequestBody Map<String, String> request){
         Map<String, String> response = new HashMap<>();
 
-        String base_currency = changeRequest.get("base_currency");
-        String secret_key = changeRequest.get("secret_key");
+        String base_currency = request.get("base_currency");
+        String secret_key = request.get("secret_key");
         List<Rate> rates = RateDAO.findByCurrency(base_currency);
 
         if(!UserDAO.findByKey(secret_key).isAdmin()){
@@ -32,7 +32,7 @@ public class AdminController {
         }
 
         for(Rate rate : rates){
-            double value = Double.parseDouble(changeRequest.get(rate.getOtherCurrency(base_currency)));
+            double value = Double.parseDouble(request.get(rate.getOtherCurrency(base_currency)));
             rate.setRateToCurrency(base_currency, value);
             response.put(rate.getOtherCurrency(base_currency), ""+value);
             RateDAO.updateRate(rate);
@@ -42,11 +42,11 @@ public class AdminController {
     }
 
     @GetMapping("/get-all")
-    public @ResponseBody Map<String, String> getAll(@RequestBody Map<String, String> getAllRequest){
+    public @ResponseBody Map<String, String> getAll(@RequestBody Map<String, String> request){
         Map<String, String> response = new HashMap<>();
 
-        String secret_key = getAllRequest.get("secret_key");
-        String currency = getAllRequest.get("currency");
+        String secret_key = request.get("secret_key");
+        String currency = request.get("currency");
 
         if(!UserDAO.findByKey(secret_key).isAdmin()){
             response.put("error", "you_dont_have_enough_permissions");
